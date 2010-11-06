@@ -23,12 +23,6 @@ struct REGEX *REGEX_new(char *regexp)
     return regex;
 }
 
-void REGEX_init(struct REGEX *regex, char *pattern)
-{
-    regex->pattern = pattern;
-    translate(pattern, regex);
-}
-
 void REGEX_free(struct REGEX *regex)
 {
     int i;
@@ -122,10 +116,18 @@ void translate(char *regexp, struct REGEX *regex)
 
                         if (element->ccl == NULL)
                         {
-                            element->ccl = (char *)malloc(sizeof(char));
+                            element->ccl = (char *)malloc(sizeof(char) * 11);
                         }
-                    
-                        strncpy(element->ccl, &regexp[i], 1);
+
+                        int length = strlen(element->ccl);
+                        if(length % 10 == 0)
+                        {
+                            int newsize = length + 11;
+                            char *newstr = (char *)malloc(sizeof(char) * newsize);
+                            element->ccl = strncpy(newstr, element->ccl, length);
+                        }
+
+                        strncat(element->ccl, &regexp[i], 1);
                     }
                 }
         }

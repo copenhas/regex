@@ -15,7 +15,6 @@ int main(int argc, char *args[])
 
     int exp_len;
     struct REGEX *regex = REGEX_new(pattern); 
-    REGEX_init(regex, pattern);
     int is_match = REGEX_match(regex, text);
     printf("Match %d\n", is_match);
     REGEX_free(regex);
