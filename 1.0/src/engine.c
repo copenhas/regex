@@ -146,9 +146,9 @@ void translate(char *regexp, Regex regex)
     regex->exp = exp;
 }
 
-struct RE *create_element(int type)
+RegexElement create_element(int type)
 {
-    struct RE *element = (struct RE *)malloc(sizeof(struct RE));
+    RegexElement element = (RegexElement)malloc(sizeof(struct RE));
     element->type = type;
     element->child = NULL;
     element->ch = '\0';
@@ -158,7 +158,7 @@ struct RE *create_element(int type)
     return element;
 }
 
-bool RE_CHAR_match(struct RE *re, char *text, int *loc)
+bool RE_CHAR_match(RegexElement re, char *text, int *loc)
 {
     if (re->ch == text[*loc])
     {
@@ -171,7 +171,7 @@ bool RE_CHAR_match(struct RE *re, char *text, int *loc)
     }
 }
 
-bool RE_STAR_match(struct RE *re, char *text, int *loc)
+bool RE_STAR_match(RegexElement re, char *text, int *loc)
 {
     /* Need to consume any text that matches */
     bool match = NO_MATCH;
@@ -183,7 +183,7 @@ bool RE_STAR_match(struct RE *re, char *text, int *loc)
     return TRUE;
 }
 
-bool RE_CLASS_match(struct RE *re, char *text, int *loc)
+bool RE_CLASS_match(RegexElement re, char *text, int *loc)
 {
     int i;
     int cls_len = strlen(re->ccl);
@@ -209,7 +209,7 @@ bool RE_CLASS_match(struct RE *re, char *text, int *loc)
     return NO_MATCH;
 }
 
-bool RE_START_ANCHOR_match(struct RE *re, char *text, int *loc)
+bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc)
 {
     if (*loc == 0)
         return TRUE; 
@@ -217,7 +217,7 @@ bool RE_START_ANCHOR_match(struct RE *re, char *text, int *loc)
         return FALSE;
 }
 
-bool RE_END_ANCHOR_match(struct RE *re, char *text, int *loc)
+bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc)
 {
     if (text[*loc] == '\0')
         return TRUE;
@@ -225,9 +225,9 @@ bool RE_END_ANCHOR_match(struct RE *re, char *text, int *loc)
         return FALSE;
 }
 
-int matchhere(struct REGEX *regex, int loc, char *text)
+int matchhere(Regex regex, int loc, char *text)
 {
-    struct RE **exp = regex->exp;
+    RegexElement *exp = regex->exp;
 
     int i;
     for (i = 0; i < regex->len; i++)
@@ -239,7 +239,7 @@ int matchhere(struct REGEX *regex, int loc, char *text)
     return MATCH;
 }
 
-int re_match(struct RE *re, char *text, int *loc)
+int re_match(RegexElement re, char *text, int *loc)
 {
     switch (re->type){
         case RE_CHAR:
