@@ -4,26 +4,27 @@
 #include "engine.h"
 #include "boolean.h"
 
-void translate(char *, struct REGEX *);
-struct RE *create_element();
-int matchhere(struct REGEX *, int , char *);
+void translate(char *, Regex);
+RegexElement create_element();
+int matchhere(Regex, int , char *);
 
-bool RE_CHAR_match(struct RE *re, char *text, int *loc);
-bool RE_STAR_match(struct RE *re, char *text, int *loc);
-bool RE_CLASS_match(struct RE *re, char *text, int *loc);
-bool RE_START_ANCHOR_match(struct RE *re, char *text, int *loc);
-bool RE_END_ANCHOR_match(struct RE *re, char *text, int *loc);
+bool RE_CHAR_match(RegexElement re, char *text, int *loc);
+bool RE_STAR_match(RegexElement re, char *text, int *loc);
+bool RE_CLASS_match(RegexElement re, char *text, int *loc);
+bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc);
+bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc);
+bool RE_ALT_match(RegexElement re, char *text, int *loc);
 
 
-struct REGEX *REGEX_new(char *regexp)
+Regex REGEX_new(char *regexp)
 {
-    struct REGEX *regex = (struct REGEX *)malloc(sizeof(struct REGEX));
+    Regex regex = (Regex)malloc(sizeof(struct REGEX));
     regex->pattern = regexp;
     translate(regexp, regex);
     return regex;
 }
 
-void REGEX_free(struct REGEX *regex)
+void REGEX_free(Regex regex)
 {
     int i;
     for(i = 0; i < regex->len; i++)
@@ -45,7 +46,7 @@ void REGEX_free(struct REGEX *regex)
     regex = NULL;
 }
 
-bool REGEX_match(struct REGEX *regex, char *text)
+bool REGEX_match(Regex regex, char *text)
 {
     int loc = 0;
     do {
@@ -56,7 +57,7 @@ bool REGEX_match(struct REGEX *regex, char *text)
     return NO_MATCH;
 }
 
-void translate(char *regexp, struct REGEX *regex)
+void translate(char *regexp, Regex regex)
 {
     //need to just use the int * passed in and make sure it isn't NULL
     int exp_len = 0;

@@ -1,0 +1,47 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BIN_DIR	makefile	/^BIN_DIR = .\/bin$/;"	m
+CC	makefile	/^CC = gcc $/;"	m
+CFLAGS	makefile	/^CFLAGS = -c -g$/;"	m
+FALSE	src/boolean.h	/^#define FALSE /;"	d
+MATCH	src/engine.h	/^#define MATCH /;"	d
+NO_MATCH	src/engine.h	/^#define NO_MATCH /;"	d
+RE	src/engine.h	/^typedef struct RE {$/;"	s
+RE	src/engine.h	/^} RE;$/;"	t	typeref:struct:RE
+REGEX	src/engine.h	/^typedef struct REGEX {$/;"	s
+REGEX	src/engine.h	/^} REGEX;$/;"	t	typeref:struct:REGEX
+REGEX_free	src/engine.c	/^void REGEX_free(struct REGEX *regex)$/;"	f
+REGEX_match	src/engine.c	/^bool REGEX_match(struct REGEX *regex, char *text)$/;"	f
+REGEX_new	src/engine.c	/^struct REGEX *REGEX_new(char *regexp)$/;"	f
+RE_CHAR	src/engine.h	/^#define RE_CHAR /;"	d
+RE_CHAR_match	src/engine.c	/^bool RE_CHAR_match(struct RE *re, char *text, int *loc)$/;"	f
+RE_CLASS	src/engine.h	/^#define RE_CLASS /;"	d
+RE_CLASS_match	src/engine.c	/^bool RE_CLASS_match(struct RE *re, char *text, int *loc)$/;"	f
+RE_END_ANCHOR	src/engine.h	/^#define RE_END_ANCHOR /;"	d
+RE_END_ANCHOR_match	src/engine.c	/^bool RE_END_ANCHOR_match(struct RE *re, char *text, int *loc)$/;"	f
+RE_STAR	src/engine.h	/^#define RE_STAR /;"	d
+RE_START_ANCHOR	src/engine.h	/^#define RE_START_ANCHOR /;"	d
+RE_START_ANCHOR_match	src/engine.c	/^bool RE_START_ANCHOR_match(struct RE *re, char *text, int *loc)$/;"	f
+RE_STAR_match	src/engine.c	/^bool RE_STAR_match(struct RE *re, char *text, int *loc)$/;"	f
+SRC_DIR	makefile	/^SRC_DIR = .\/src$/;"	m
+TRUE	src/boolean.h	/^#define TRUE /;"	d
+__BOOLEAN_H__	src/boolean.h	/^#define __BOOLEAN_H__$/;"	d
+__ENGINE_H__	src/engine.h	/^#define __ENGINE_H__$/;"	d
+bool	src/boolean.h	/^typedef int bool;$/;"	t
+ccl	src/engine.h	/^    char *ccl;$/;"	m	struct:RE
+ch	src/engine.h	/^    int ch;$/;"	m	struct:RE
+child	src/engine.h	/^    struct RE *child;$/;"	m	struct:RE	typeref:struct:RE::RE
+create_element	src/engine.c	/^struct RE *create_element(int type)$/;"	f
+exp	src/engine.h	/^    struct RE ** exp;$/;"	m	struct:REGEX	typeref:struct:REGEX::RE
+len	src/engine.h	/^    int len;$/;"	m	struct:REGEX
+main	src/main.c	/^int main(int argc, char *args[])$/;"	f
+matchhere	src/engine.c	/^int matchhere(struct REGEX *regex, int loc, char *text)$/;"	f
+nccl	src/engine.h	/^    bool nccl;$/;"	m	struct:RE
+pattern	src/engine.h	/^    char *pattern;$/;"	m	struct:REGEX
+re_match	src/engine.c	/^int re_match(struct RE *re, char *text, int *loc)$/;"	f
+translate	src/engine.c	/^void translate(char *regexp, struct REGEX *regex)$/;"	f
+type	src/engine.h	/^    int type;$/;"	m	struct:RE

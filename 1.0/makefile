@@ -5,7 +5,7 @@ BIN_DIR = ./bin
 SRC_DIR = ./src
 
 
-regex: clean main.o engine.o
+regex: clean main.o engine.o tags
 	$(CC) -o $(BIN_DIR)/regex $(BIN_DIR)/main.o $(BIN_DIR)/engine.o
 
 main.o: $(SRC_DIR)/main.c engine.o
@@ -14,5 +14,8 @@ main.o: $(SRC_DIR)/main.c engine.o
 engine.o: $(SRC_DIR)/engine.c $(SRC_DIR)/engine.h
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/engine.o $(SRC_DIR)/engine.c
 
+tags:
+	ctags -R
+
 clean:
-	rm $(BIN_DIR)/*
+	rm -f $(BIN_DIR)/*

@@ -4,16 +4,10 @@
 #define MATCH 1
 #define NO_MATCH 0
 
-#ifndef __BOOLEAN_H__
 #include "boolean.h"
-#endif
 
 /* types of regular expression elements supported */
-#define RE_CHAR 0
-#define RE_STAR 1
-#define RE_CLASS 2
-#define RE_START_ANCHOR 3
-#define RE_END_ANCHOR 4
+enum { RE_CHAR, RE_STAR, RE_CLASS, RE_START_ANCHOR, RE_END_ANCHOR };
 
 typedef struct RE {
     int type;
@@ -21,16 +15,16 @@ typedef struct RE {
     int ch;
     char *ccl;
     bool nccl;
-} RE;
+} *RegexElement;
 
 typedef struct REGEX {
     int len;
-    struct RE ** exp;
+    RegexElement *exp;
     char *pattern;
-} REGEX;
+} *Regex;
 
-struct REGEX *REGEX_new(char *pattern);
-void REGEX_free(struct REGEX *);
-bool REGEX_match(struct REGEX*, char *);
+Regex REGEX_new(char *pattern);
+void REGEX_free(Regex);
+bool REGEX_match(Regex, char *);
 
 #endif
