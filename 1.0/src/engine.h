@@ -1,8 +1,6 @@
 #ifndef __ENGINE_H__
 #define __ENGINE_H__
 
-#define MATCH 1
-#define NO_MATCH 0
 
 #include "boolean.h"
 
@@ -24,7 +22,7 @@ typedef struct REGEX {
 } *Regex;
 
 Regex REGEX_new(char *pattern);
-void REGEX_free(Regex);
+void REGEX_free(Regex *);
 bool REGEX_match(Regex, char *);
 
 #endif

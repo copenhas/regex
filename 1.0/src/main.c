@@ -13,11 +13,14 @@ int main(int argc, char *args[])
     char *text = args[1];
     char *pattern = args[2];
 
-    int exp_len;
-    struct REGEX *regex = REGEX_new(pattern); 
-    int is_match = REGEX_match(regex, text);
-    printf("Match %d\n", is_match);
-    REGEX_free(regex);
+    Regex regex = REGEX_new(pattern); 
+    bool is_match = REGEX_match(regex, text);
+    REGEX_free(&regex);
+
+    if (is_match == TRUE)
+        printf("True\n");
+    else
+        printf("False\n");
 
     return 0;
 }
