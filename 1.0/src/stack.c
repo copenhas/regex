@@ -9,18 +9,19 @@ Stack stack_new()
 
     stack->size = 10;
     stack->length = 0;
-    stack->elements = (void **)calloc(stack->size, sizeof(void *));
+    stack->elements = (EngineState *)calloc(stack->size, sizeof(EngineState *));
 
     return stack;
 }
 
 void stack_free(Stack *stack)
 {
+    free((*stack)->elements);
     free(*stack);
     *stack = NULL;
 }
 
-void *stack_pop(Stack stack)
+EngineState stack_pop(Stack stack)
 {
     if(stack == NULL) return NULL;
     if(stack->length == 0) return NULL;
@@ -28,13 +29,29 @@ void *stack_pop(Stack stack)
     return stack->elements[--stack->length];
 }
 
-void stack_push(Stack stack, void *element)
+void stack_push(Stack stack, EngineState element)
 {
     if(stack->length == stack->size)
     {
         stack->size *= 2;
-        stack->elements = (void **)realloc(stack->elements, stack->size * sizeof(void *)); 
+        stack->elements = (EngineState *)realloc(stack->elements, 
+                                           stack->size * sizeof(EngineState *)); 
     }
 
     stack->elements[stack->length++] = element;
+}
+
+EngineState state_new(int exp_index, int text_index)
+{
+    EngineState state = (EngineState)malloc(sizeof(state));
+    state->exp_index = exp_index;
+    state->text_index = text_index;
+
+    return state;
+}
+
+void state_free(EngineState *state)
+{
+   free(*state); 
+   *state = NULL;
 }

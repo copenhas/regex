@@ -45,6 +45,12 @@ void REGEX_free(Regex *regex_ptr)
             regex->exp[i]->child = NULL;
         }
 
+        if (regex->exp[i]->ccl != NULL)
+        {
+            free(regex->exp[i]->ccl);
+            regex->exp[i]->ccl = NULL;
+        }
+
         free(regex->exp[i]);
         regex->exp[i] = NULL;
     }
@@ -70,11 +76,11 @@ void translate(char *regexp, Regex regex)
 {
     //need to just use the int * passed in and make sure it isn't NULL
     int exp_len = 0;
-    struct RE **exp = NULL;
+    RegexElement *exp = NULL;
 
     bool in_cls = false;
     bool start_cls = false;
-    struct RE *element;
+    RegexElement element = NULL;
 
     int i;
     int relen = strlen(regexp);
@@ -121,20 +127,19 @@ void translate(char *regexp, Regex regex)
                     }
                     else 
                     {
-                        if (start_cls == true)
-                            start_cls = false;
+                        if (start_cls == true) start_cls = false;
 
                         if (element->ccl == NULL)
                         {
-                            element->ccl = (char *)malloc(sizeof(char) * 11);
+                            element->ccl = (char *)calloc(11, sizeof(char));
                         }
 
                         int length = strlen(element->ccl);
                         if(length % 10 == 0)
                         {
                             int newsize = length + 11;
-                            char *newstr = (char *)malloc(sizeof(char) * newsize);
-                            element->ccl = strncpy(newstr, element->ccl, length);
+                            element->ccl = (char *)realloc(element->ccl, 
+                                                           sizeof(char) * newsize);
                         }
 
                         strncat(element->ccl, &regexp[i], 1);
@@ -145,7 +150,7 @@ void translate(char *regexp, Regex regex)
         if (in_cls == false)
         {
             exp_len++;
-            exp = (struct RE **)realloc(exp, sizeof(struct RE *) * exp_len);
+            exp = (RegexElement *)realloc(exp, sizeof(struct RE *) * exp_len);
             exp[exp_len - 1] = element;
             element = NULL;
         }
@@ -176,20 +181,34 @@ bool matchhere(Regex regex, int loc, char *text)
      * matching state on the stack
      */
     Stack stack = stack_new();
-    RegexElement *exp = regex->exp;
+    EngineState initial = state_new(0, loc);
+    stack_push(stack, initial);
 
     bool match = true;
-    int i;
-    for (i = 0; i < regex->len; i++)
+
+    while(stack->length > 0)
     {
-        if (RE_match(exp[i], text, &loc, &stack) == false)
+        EngineState current = stack_pop(stack);
+
+        RegexElement *exp = regex->exp;
+        int first_element = current->exp_index;
+        int last_element = regex->len;
+        int text_index = current->text_index;
+        int i;
+        for (i = first_element; i < last_element; i++)
         {
-            match = false;
-            break;
+            if (RE_match(exp[i], text, &text_index, &stack) == false)
+            {
+                match = false;
+                break;
+            }
         }
+
+        state_free(&current);
     }
 
     stack_free(&stack);
+
     return match;
 }
 
