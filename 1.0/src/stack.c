@@ -16,7 +16,10 @@ void stack_free(Stack *stack)
 
 void *stack_pop(Stack stack)
 {
-    return NULL;    
+    if(stack == NULL) return NULL;
+    if(stack->last_index == 0) return NULL;
+
+    return stack->elements[stack->last_index--];
 }
 
 void stack_push(Stack stack, void *element)

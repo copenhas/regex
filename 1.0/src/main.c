@@ -17,7 +17,7 @@ int main(int argc, char *args[])
     bool is_match = REGEX_match(regex, text);
     REGEX_free(&regex);
 
-    if (is_match == TRUE)
+    if (is_match == true)
         printf("True\n");
     else
         printf("False\n");

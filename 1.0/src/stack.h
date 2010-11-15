@@ -4,7 +4,7 @@
 
 typedef struct stack {
     int last_index;
-    void *elements;
+    void **elements;
 } *Stack;
 
 Stack stack_new();

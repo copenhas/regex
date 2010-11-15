@@ -1,8 +1,7 @@
 #ifndef __ENGINE_H__
 #define __ENGINE_H__
 
-
-#include "boolean.h"
+#include <stdbool.h>
 
 /* types of regular expression elements supported */
 enum { RE_CHAR, RE_STAR, RE_CLASS, RE_START_ANCHOR, RE_END_ANCHOR };

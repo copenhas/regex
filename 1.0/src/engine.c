@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "engine.h"
-#include "boolean.h"
 #include "stack.h"
 
 void translate(char *, Regex);
 RegexElement create_element();
-int matchhere(Regex, int , char *);
+bool matchhere(Regex, int , char *);
 
 bool RE_match(RegexElement re, char *text, int *loc, Stack *stack);
 bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack *stack);
@@ -53,10 +53,10 @@ bool REGEX_match(Regex regex, char *text)
 {
     int loc = 0;
     do {
-        if (matchhere(regex, loc, text)) return TRUE;
+        if (matchhere(regex, loc, text)) return true;
     } while (text[loc++] != '\0');
 
-    return FALSE;
+    return false;
 }
 
 void translate(char *regexp, Regex regex)
@@ -65,8 +65,8 @@ void translate(char *regexp, Regex regex)
     int exp_len = 0;
     struct RE **exp = NULL;
 
-    bool in_cls = FALSE;
-    bool start_cls = FALSE;
+    bool in_cls = false;
+    bool start_cls = false;
     struct RE *element;
 
     int i;
@@ -79,12 +79,12 @@ void translate(char *regexp, Regex regex)
                 element->child = exp[--exp_len];
                 break;
             case '[':
-                in_cls = TRUE;
-                start_cls = TRUE;
+                in_cls = true;
+                start_cls = true;
                 element = create_element(RE_CLASS);
                 break;
             case ']':
-                in_cls = FALSE;
+                in_cls = false;
                 break;
             case '$':
                 if (i == (relen -1))
@@ -101,21 +101,21 @@ void translate(char *regexp, Regex regex)
                 }
                 /* else then just continue down to the default case */
             default:
-                if (in_cls == FALSE)
+                if (in_cls == false)
                 {
                     element = create_element(RE_CHAR);
                     element->ch = regexp[i];
                 }
                 else
                 {
-                    if (start_cls == TRUE && regexp[i] == '^')
+                    if (start_cls == true && regexp[i] == '^')
                     {
-                            element->nccl = TRUE;
+                            element->nccl = true;
                     }
                     else 
                     {
-                        if (start_cls == TRUE)
-                            start_cls = FALSE;
+                        if (start_cls == true)
+                            start_cls = false;
 
                         if (element->ccl == NULL)
                         {
@@ -135,7 +135,7 @@ void translate(char *regexp, Regex regex)
                 }
         }
 
-        if (in_cls == FALSE)
+        if (in_cls == false)
         {
             exp_len++;
             exp = (struct RE **)realloc(exp, sizeof(struct RE *) * exp_len);
@@ -155,7 +155,7 @@ RegexElement create_element(int type)
     element->child = NULL;
     element->ch = '\0';
     element->ccl = NULL;
-    element->nccl = FALSE;
+    element->nccl = false;
 
     return element;
 }
@@ -166,13 +166,13 @@ bool matchhere(Regex regex, int loc, char *text)
 
     RegexElement *exp = regex->exp;
 
-    bool match = TRUE;
+    bool match = true;
     int i;
     for (i = 0; i < regex->len; i++)
     {
-        if (RE_match(exp[i], text, &loc, &stack) == FALSE)
+        if (RE_match(exp[i], text, &loc, &stack) == false)
         {
-            match = FALSE;
+            match = false;
             break;
         }
     }
@@ -196,7 +196,7 @@ bool RE_match(RegexElement re, char *text, int *loc, Stack *stack)
         case RE_END_ANCHOR:
             return RE_END_ANCHOR_match(re, text, loc, stack);
         default:
-            return FALSE;
+            return false;
     }
 }
 
@@ -205,24 +205,24 @@ bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack *stack)
     if (re->ch == text[*loc])
     {
         *loc = *loc + 1;
-        return TRUE;
+        return true;
     }
     else
     {
-        return FALSE;
+        return false;
     }
 }
 
 bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack *stack)
 {
     /* Need to consume any text that matches */
-    bool match = FALSE;
+    bool match = false;
     do {
         match = RE_match(re->child, text, loc, stack);
-    } while (text[*loc] != '\0' && match == TRUE);
+    } while (text[*loc] != '\0' && match == true);
 
     /* Star can match nothing or something so always true */
-    return TRUE;
+    return true;
 }
 
 bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack *stack)
@@ -231,39 +231,39 @@ bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack *stack)
     int cls_len = strlen(re->ccl);
     for (i = 0; i < cls_len; i++)
     {
-        if (re->nccl == FALSE && re->ccl[i] == text[*loc])
+        if (re->nccl == false && re->ccl[i] == text[*loc])
         {
             *loc = *loc + 1;
-            return TRUE;
+            return true;
         }
-        else if (re->nccl == TRUE && re->ccl[i] == text[*loc])
+        else if (re->nccl == true && re->ccl[i] == text[*loc])
         {
-            return FALSE;
+            return false;
         }
-        else if (re->nccl == TRUE && i == (cls_len - 1) 
+        else if (re->nccl == true && i == (cls_len - 1) 
                 && re->ccl[i] != text[*loc])
         {
             *loc = *loc + 1;
-            return TRUE;
+            return true;
         }
     }
 
-    return FALSE;
+    return false;
 }
 
 bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack *stack)
 {
     if (*loc == 0)
-        return TRUE; 
+        return true; 
     else
-        return FALSE;
+        return false;
 }
 
 bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack *stack)
 {
     if (text[*loc] == '\0')
-        return TRUE;
+        return true;
     else
-        return FALSE;
+        return false;
 }
 
