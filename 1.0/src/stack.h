@@ -3,7 +3,8 @@
 #define __STACK_H__
 
 typedef struct stack {
-    int last_index;
+    int length;
+    int size;
     void **elements;
 } *Stack;
 

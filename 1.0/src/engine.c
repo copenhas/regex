@@ -5,10 +5,17 @@
 #include "engine.h"
 #include "stack.h"
 
+struct RE_State 
+{
+    Regex regex;
+    int re_index;
+    char *text;
+    int *loc;
+};
+
 void translate(char *, Regex);
 RegexElement create_element();
 bool matchhere(Regex, int , char *);
-
 bool RE_match(RegexElement re, char *text, int *loc, Stack *stack);
 bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack *stack);
 bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack *stack);
@@ -162,8 +169,13 @@ RegexElement create_element(int type)
 
 bool matchhere(Regex regex, int loc, char *text)
 {
+    /*
+     * need to initialize the regex stack with the first state to try
+     * each of the regex elements get a chance to add to the Stack
+     * we should keep trying to match so long as there is a possibly
+     * matching state on the stack
+     */
     Stack stack = stack_new();
-
     RegexElement *exp = regex->exp;
 
     bool match = true;
@@ -178,7 +190,6 @@ bool matchhere(Regex regex, int loc, char *text)
     }
 
     stack_free(&stack);
-
     return match;
 }
 
