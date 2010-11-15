@@ -15,6 +15,7 @@ struct RE_State
 
 void translate(char *, Regex);
 RegexElement create_element();
+void RE_CLASS_add_char(RegexElement, char);
 bool matchhere(Regex, int , char *);
 bool RE_match(RegexElement re, char *text, int *loc, Stack *stack);
 bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack *stack);
@@ -119,31 +120,14 @@ void translate(char *regexp, Regex regex)
                     element = create_element(RE_CHAR);
                     element->ch = regexp[i];
                 }
-                else
+                else if (start_cls == true && regexp[i] == '^')
                 {
-                    if (start_cls == true && regexp[i] == '^')
-                    {
-                            element->nccl = true;
-                    }
-                    else 
-                    {
-                        if (start_cls == true) start_cls = false;
-
-                        if (element->ccl == NULL)
-                        {
-                            element->ccl = (char *)calloc(11, sizeof(char));
-                        }
-
-                        int length = strlen(element->ccl);
-                        if(length % 10 == 0)
-                        {
-                            int newsize = length + 11;
-                            element->ccl = (char *)realloc(element->ccl, 
-                                                           sizeof(char) * newsize);
-                        }
-
-                        strncat(element->ccl, &regexp[i], 1);
-                    }
+                    element->nccl = true;
+                }
+                else 
+                {
+                    if (start_cls == true) start_cls = false;
+                    RE_CLASS_add_char(element, regexp[i]);
                 }
         }
 
@@ -170,6 +154,33 @@ RegexElement create_element(int type)
     element->nccl = false;
 
     return element;
+}
+
+void RE_CLASS_add_char(RegexElement element, char ch)
+{
+    if (element->ccl == NULL)
+    {
+        element->ccl = (char *)calloc(11, sizeof(char));
+    }
+
+    int length = strlen(element->ccl);
+    if(length % 10 == 0)
+    {
+        int newsize = length + 11;
+        char *newccl = (char *)realloc(element->ccl, 
+                                       sizeof(char) * newsize);
+
+        if(newccl != NULL)
+        {
+            element->ccl = newccl;
+        }
+        else
+        {
+            /* ack we are out of memory !!! */
+        }
+    }
+
+    strncat(element->ccl, &ch, 1);
 }
 
 bool matchhere(Regex regex, int loc, char *text)
