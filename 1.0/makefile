@@ -13,13 +13,7 @@ regex: main.o engine.o stack.o
 		$(BIN_DIR)/engine.o \
 		$(BIN_DIR)/stack.o
 
-main.o: $(SRC_DIR)/main.c engine.o
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $<
-
-engine.o: $(SRC_DIR)/engine.c $(SRC_DIR)/engine.h
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $< 
-
-stack.o: $(SRC_DIR)/stack.c $(SRC_DIR)/stack.h
+%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/$@ $<
 
 tags:
