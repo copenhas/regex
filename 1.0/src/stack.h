@@ -12,6 +12,7 @@ typedef struct state {
 EngineState state_new(int, int);
 void state_free(EngineState *);
 
+
 typedef struct stack {
     int length;
     int size;

@@ -5,7 +5,6 @@
 #include "engine.h"
 #include "stack.h"
 
-
 RegexElement RE_new();
 void RE_free(RegexElement *);
 void translate(char *, Regex);

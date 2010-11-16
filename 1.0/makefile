@@ -14,22 +14,19 @@ EXE = $(BIN_DIR)/regex
 all: $(EXE) tags
 
 lint:
-	$(LINT) $(SRC_DIR)/*
+	$(LINT) $(SRC_DIR)/* 
 
 memory: $(EXE) 
 	$(MEMPROF) $(EXE) anchorcllassallstail ^anchor[class]*tail$ 
 
 $(EXE): $(BIN_DIR)/main.o $(BIN_DIR)/engine.o $(BIN_DIR)/stack.o
-	$(CC) -o $(EXE) \
-		$(BIN_DIR)/main.o \
-		$(BIN_DIR)/engine.o \
-		$(BIN_DIR)/stack.o
+	$(CC) -o $(EXE) $(BIN_DIR)/*.o
 
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-tags:
-	$(TAGS) -R
+tags: $(SRC_DIR)/*
+	$(TAGS) -R $(SRC_DIR)/
 
 clobber: 
 	rm -f $(BIN_DIR)/*
