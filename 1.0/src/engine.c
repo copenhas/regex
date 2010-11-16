@@ -5,13 +5,6 @@
 #include "engine.h"
 #include "stack.h"
 
-struct RE_State 
-{
-    Regex regex;
-    int re_index;
-    char *text;
-    int *loc;
-};
 
 void RE_free(RegexElement *);
 void translate(char *, Regex);
