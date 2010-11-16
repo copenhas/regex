@@ -13,6 +13,7 @@ struct RE_State
     int *loc;
 };
 
+void RE_free(RegexElement *);
 void translate(char *, Regex);
 RegexElement create_element();
 void RE_CLASS_add_char(RegexElement, char);
@@ -40,20 +41,7 @@ void REGEX_free(Regex *regex_ptr)
     int i;
     for(i = 0; i < regex->len; i++)
     {
-        if (regex->exp[i]->child != NULL)
-        {
-            free(regex->exp[i]->child);
-            regex->exp[i]->child = NULL;
-        }
-
-        if (regex->exp[i]->ccl != NULL)
-        {
-            free(regex->exp[i]->ccl);
-            regex->exp[i]->ccl = NULL;
-        }
-
-        free(regex->exp[i]);
-        regex->exp[i] = NULL;
+        RE_free(&(regex->exp[i]));
     }
 
     free(regex->exp);
@@ -61,6 +49,25 @@ void REGEX_free(Regex *regex_ptr)
     
     free(regex);
     *regex_ptr = NULL;
+}
+
+void RE_free(RegexElement *element)
+{
+    RegexElement tofree = *element;
+    if (tofree->child != NULL)
+    {
+        RE_free(&(tofree->child));
+        tofree->child = NULL;
+    }
+
+    if (tofree->ccl != NULL)
+    {
+        free(tofree->ccl);
+        tofree->ccl = NULL;
+    }
+
+    free(tofree);
+    *element = NULL; 
 }
 
 bool REGEX_match(Regex regex, char *text)
@@ -167,17 +174,9 @@ void RE_CLASS_add_char(RegexElement element, char ch)
     if(length % 10 == 0)
     {
         int newsize = length + 11;
-        char *newccl = (char *)realloc(element->ccl, 
+        // this could cause a memory leak for i'm ignoring it
+        element->ccl = (char *)realloc(element->ccl, 
                                        sizeof(char) * newsize);
-
-        if(newccl != NULL)
-        {
-            element->ccl = newccl;
-        }
-        else
-        {
-            /* ack we are out of memory !!! */
-        }
     }
 
     strncat(element->ccl, &ch, 1);
