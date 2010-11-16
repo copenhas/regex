@@ -6,18 +6,19 @@
 #include "stack.h"
 
 
+RegexElement RE_new();
 void RE_free(RegexElement *);
 void translate(char *, Regex);
-RegexElement create_element();
 void RE_CLASS_add_char(RegexElement, char);
 bool matchhere(Regex, int , char *);
-bool RE_match(RegexElement re, char *text, int *loc, Stack *stack);
-bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack *stack);
-bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack *stack);
-bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack *stack);
-bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack *stack);
-bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack *stack);
-bool RE_ALT_match(RegexElement re, char *text, int *loc, Stack *stack);
+
+bool RE_match(RegexElement re, char *text, int *loc, Stack stack);
+bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack stack);
+bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack stack);
+bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack stack);
+bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack);
+bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack);
+bool RE_ALT_match(RegexElement re, char *text, int *loc, Stack stack);
 
 
 Regex REGEX_new(char *regexp)
@@ -44,6 +45,16 @@ void REGEX_free(Regex *regex_ptr)
     *regex_ptr = NULL;
 }
 
+bool REGEX_match(Regex regex, char *text)
+{
+    int loc = 0;
+    do {
+        if (matchhere(regex, loc, text)) return true;
+    } while (text[loc++] != '\0');
+
+    return false;
+}
+
 void RE_free(RegexElement *element)
 {
     RegexElement tofree = *element;
@@ -63,16 +74,6 @@ void RE_free(RegexElement *element)
     *element = NULL; 
 }
 
-bool REGEX_match(Regex regex, char *text)
-{
-    int loc = 0;
-    do {
-        if (matchhere(regex, loc, text)) return true;
-    } while (text[loc++] != '\0');
-
-    return false;
-}
-
 void translate(char *regexp, Regex regex)
 {
     //need to just use the int * passed in and make sure it isn't NULL
@@ -89,13 +90,13 @@ void translate(char *regexp, Regex regex)
     {
         switch (regexp[i]){
             case '*':
-                element = create_element(RE_STAR);
+                element = RE_new(RE_STAR);
                 element->child = exp[--exp_len];
                 break;
             case '[':
                 in_cls = true;
                 start_cls = true;
-                element = create_element(RE_CLASS);
+                element = RE_new(RE_CLASS);
                 break;
             case ']':
                 in_cls = false;
@@ -103,21 +104,21 @@ void translate(char *regexp, Regex regex)
             case '$':
                 if (i == (relen -1))
                 {
-                    element = create_element(RE_END_ANCHOR);
+                    element = RE_new(RE_END_ANCHOR);
                     break;
                 }
                 /* continue down to the default */
             case '^':
                 if (i == 0)
                 {
-                    element = create_element(RE_START_ANCHOR);
+                    element = RE_new(RE_START_ANCHOR);
                     break;
                 }
                 /* else then just continue down to the default case */
             default:
                 if (in_cls == false)
                 {
-                    element = create_element(RE_CHAR);
+                    element = RE_new(RE_CHAR);
                     element->ch = regexp[i];
                 }
                 else if (start_cls == true && regexp[i] == '^')
@@ -144,7 +145,7 @@ void translate(char *regexp, Regex regex)
     regex->exp = exp;
 }
 
-RegexElement create_element(int type)
+RegexElement RE_new(int type)
 {
     RegexElement element = (RegexElement)malloc(sizeof(struct RE));
     element->type = type;
@@ -200,7 +201,7 @@ bool matchhere(Regex regex, int loc, char *text)
         int i;
         for (i = first_element; i < last_element; i++)
         {
-            if (RE_match(exp[i], text, &text_index, &stack) == false)
+            if (RE_match(exp[i], text, &text_index, stack) == false)
             {
                 match = false;
                 break;
@@ -215,7 +216,7 @@ bool matchhere(Regex regex, int loc, char *text)
     return match;
 }
 
-bool RE_match(RegexElement re, char *text, int *loc, Stack *stack)
+bool RE_match(RegexElement re, char *text, int *loc, Stack stack)
 {
     switch (re->type){
         case RE_CHAR:
@@ -233,7 +234,7 @@ bool RE_match(RegexElement re, char *text, int *loc, Stack *stack)
     }
 }
 
-bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack *stack)
+bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack stack)
 {
     if (re->ch == text[*loc])
     {
@@ -246,7 +247,7 @@ bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack *stack)
     }
 }
 
-bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack *stack)
+bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack stack)
 {
     /* Need to consume any text that matches */
     bool match = false;
@@ -258,7 +259,7 @@ bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack *stack)
     return true;
 }
 
-bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack *stack)
+bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack stack)
 {
     int i;
     int cls_len = strlen(re->ccl);
@@ -284,7 +285,7 @@ bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack *stack)
     return false;
 }
 
-bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack *stack)
+bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack)
 {
     if (*loc == 0)
         return true; 
@@ -292,7 +293,7 @@ bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack *stack)
         return false;
 }
 
-bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack *stack)
+bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack)
 {
     if (text[*loc] == '\0')
         return true;

@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -c -g 
 
 MEMPROF = valgrind --leak-check=full --show-reachable=yes --track-origins=yes
-
+LINT = splint 
 TAGS = ctags
 
 BIN_DIR = ./bin
@@ -12,6 +12,9 @@ EXE = $(BIN_DIR)/regex
 
 
 all: $(EXE) tags
+
+lint:
+	$(LINT) $(SRC_DIR)/*
 
 memory: $(EXE) 
 	$(MEMPROF) $(EXE) anchorcllassallstail ^anchor[class]*tail$ 
