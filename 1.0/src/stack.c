@@ -16,6 +16,12 @@ Stack stack_new()
 
 void stack_free(Stack *stack)
 {
+    while((*stack)->length > 0)
+    {
+        EngineState state = stack_pop(*stack);
+        state_free(&state);
+    }
+
     free((*stack)->elements);
     free(*stack);
     *stack = NULL;
@@ -26,7 +32,10 @@ EngineState stack_pop(Stack stack)
     if(stack == NULL) return NULL;
     if(stack->length == 0) return NULL;
 
-    return stack->elements[--stack->length];
+    EngineState element = stack->elements[stack->length - 1];
+    stack->elements[stack->length - 1] = NULL;
+    stack->length--;
+    return element;
 }
 
 void stack_push(Stack stack, EngineState element)
@@ -38,16 +47,25 @@ void stack_push(Stack stack, EngineState element)
                                            stack->size * sizeof(EngineState *)); 
     }
 
-    stack->elements[stack->length++] = element;
+    stack->elements[(stack->length)++] = element;
 }
 
-EngineState state_new(int exp_index, int text_index)
+EngineState state_new(RegexElement *elements, int exp_index, char *text, int text_index)
 {
     EngineState state = (EngineState)malloc(sizeof(state));
+
+    state->elements = elements;
     state->exp_index = exp_index;
+    state->text = text;
     state->text_index = text_index;
 
     return state;
+}
+
+EngineState state_clone(const struct state to_clone)
+{
+    return state_new(to_clone.elements, to_clone.exp_index,
+                     to_clone.text, to_clone.text_index);
 }
 
 void state_free(EngineState *state)

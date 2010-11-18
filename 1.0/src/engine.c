@@ -11,20 +11,23 @@ void translate(char *, Regex);
 void RE_CLASS_add_char(RegexElement, char);
 bool matchhere(Regex, int , char *);
 
-bool RE_match(RegexElement re, char *text, int *loc, Stack stack);
-bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack stack);
-bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack stack);
-bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack stack);
-bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack);
-bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack);
-bool RE_ALT_match(RegexElement re, char *text, int *loc, Stack stack);
+bool RE_match(RegexElement, Stack, EngineState); 
+bool RE_CHAR_match(RegexElement, Stack, EngineState); 
+bool RE_STAR_match(RegexElement, Stack, EngineState); 
+bool RE_CLASS_match(RegexElement, Stack, EngineState); 
+bool RE_START_ANCHOR_match(RegexElement, Stack, EngineState); 
+bool RE_END_ANCHOR_match(RegexElement, Stack, EngineState); 
+bool RE_ALT_match(RegexElement, Stack, EngineState); 
 
 
 Regex REGEX_new(char *regexp)
 {
     Regex regex = (Regex)malloc(sizeof(struct REGEX));
+    if (regex == NULL) return NULL;
+
     regex->pattern = regexp;
     translate(regexp, regex);
+
     return regex;
 }
 
@@ -184,60 +187,59 @@ bool matchhere(Regex regex, int loc, char *text)
      * matching state on the stack
      */
     Stack stack = stack_new();
-    EngineState initial = state_new(0, loc);
+    EngineState initial = state_new(regex->exp, 0, text, loc);
     stack_push(stack, initial);
 
-    bool match = true;
 
-    while(stack->length > 0)
+    bool match = false;
+
+    do
     {
         EngineState current = stack_pop(stack);
 
+        match = false;
         RegexElement *exp = regex->exp;
         int first_element = current->exp_index;
         int last_element = regex->len;
-        int text_index = current->text_index;
         int i;
         for (i = first_element; i < last_element; i++)
         {
-            if (RE_match(exp[i], text, &text_index, stack) == false)
-            {
-                match = false;
-                break;
-            }
+            match = RE_match(exp[i], stack, current);
+            if (match == false) break;
         }
 
         state_free(&current);
-    }
+
+    } while(stack->length > 0 && match == false);
 
     stack_free(&stack);
 
     return match;
 }
 
-bool RE_match(RegexElement re, char *text, int *loc, Stack stack)
+bool RE_match(RegexElement re, Stack stack, EngineState current) 
 {
     switch (re->type){
         case RE_CHAR:
-            return RE_CHAR_match(re, text, loc, stack);
+            return RE_CHAR_match(re, stack, current); 
         case RE_STAR:
-            return RE_STAR_match(re, text, loc, stack);
+            return RE_STAR_match(re, stack, current); 
         case RE_CLASS:
-            return RE_CLASS_match(re, text, loc, stack);
+            return RE_CLASS_match(re, stack, current); 
         case RE_START_ANCHOR:
-            return RE_START_ANCHOR_match(re, text, loc, stack);
+            return RE_START_ANCHOR_match(re, stack, current); 
         case RE_END_ANCHOR:
-            return RE_END_ANCHOR_match(re, text, loc, stack);
+            return RE_END_ANCHOR_match(re, stack, current); 
         default:
             return false;
     }
 }
 
-bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack stack)
+bool RE_CHAR_match(RegexElement re, Stack stack, EngineState current) 
 {
-    if (re->ch == text[*loc])
+    if (re->ch == current->text[current->text_index])
     {
-        *loc = *loc + 1;
+        current->text_index++;
         return true;
     }
     else
@@ -246,37 +248,51 @@ bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack stack)
     }
 }
 
-bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack stack)
+bool RE_STAR_match(RegexElement re, Stack stack, EngineState current) 
 {
     /* Need to consume any text that matches */
     bool match = false;
     do {
-        match = RE_match(re->child, text, loc, stack);
-    } while (text[*loc] != '\0' && match == true);
+        match = RE_match(re->child, stack, current); 
+
+        if(match == true)
+        {
+            /* 
+             * since a * eating too much text could cause the
+             * expression to fail as a whole we need to record
+             * states to try when backtracking
+             */
+            //EngineState rewind = state_clone(current);
+            EngineState rewind = state_clone(*current);
+            rewind->exp_index++;
+            stack_push(stack, rewind);
+        }
+    } while (current->text[current->text_index] != '\0' && match == true);
 
     /* Star can match nothing or something so always true */
     return true;
 }
 
-bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack stack)
+bool RE_CLASS_match(RegexElement re, Stack stack, EngineState current) 
 {
+    int loc = current->text_index;
     int i;
     int cls_len = strlen(re->ccl);
     for (i = 0; i < cls_len; i++)
     {
-        if (re->nccl == false && re->ccl[i] == text[*loc])
+        if (re->nccl == false && re->ccl[i] == current->text[loc])
         {
-            *loc = *loc + 1;
+            current->text_index++;
             return true;
         }
-        else if (re->nccl == true && re->ccl[i] == text[*loc])
+        else if (re->nccl == true && re->ccl[i] == current->text[loc])
         {
             return false;
         }
         else if (re->nccl == true && i == (cls_len - 1) 
-                && re->ccl[i] != text[*loc])
+                && re->ccl[i] != current->text[loc])
         {
-            *loc = *loc + 1;
+            current->text_index++;
             return true;
         }
     }
@@ -284,17 +300,17 @@ bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack stack)
     return false;
 }
 
-bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack)
+bool RE_START_ANCHOR_match(RegexElement re, Stack stack, EngineState current) 
 {
-    if (*loc == 0)
+    if (current->text_index == 0)
         return true; 
     else
         return false;
 }
 
-bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack)
+bool RE_END_ANCHOR_match(RegexElement re, Stack stack, EngineState current) 
 {
-    if (text[*loc] == '\0')
+    if (current->text[current->text_index] == '\0')
         return true;
     else
         return false;

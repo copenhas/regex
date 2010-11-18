@@ -5,11 +5,14 @@
 #include "engine.h"
 
 typedef struct state {
+    RegexElement *elements;
     int exp_index;
+    char *text;
     int text_index;
 } *EngineState;
 
-EngineState state_new(int, int);
+EngineState state_new(RegexElement *, int, char *, int);
+EngineState state_clone(const struct state);
 void state_free(EngineState *);
 
 

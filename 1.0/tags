@@ -11,18 +11,18 @@ REGEX_free	./src/engine.c	/^void REGEX_free(Regex *regex_ptr)$/;"	f
 REGEX_match	./src/engine.c	/^bool REGEX_match(Regex regex, char *text)$/;"	f
 REGEX_new	./src/engine.c	/^Regex REGEX_new(char *regexp)$/;"	f
 RE_CHAR	./src/engine.h	/^enum { RE_CHAR, RE_STAR, RE_CLASS, RE_START_ANCHOR, RE_END_ANCHOR };$/;"	e	enum:__anon1
-RE_CHAR_match	./src/engine.c	/^bool RE_CHAR_match(RegexElement re, char *text, int *loc, Stack stack)$/;"	f
+RE_CHAR_match	./src/engine.c	/^bool RE_CHAR_match(RegexElement re, Stack stack, EngineState current) $/;"	f
 RE_CLASS	./src/engine.h	/^enum { RE_CHAR, RE_STAR, RE_CLASS, RE_START_ANCHOR, RE_END_ANCHOR };$/;"	e	enum:__anon1
 RE_CLASS_add_char	./src/engine.c	/^void RE_CLASS_add_char(RegexElement element, char ch)$/;"	f
-RE_CLASS_match	./src/engine.c	/^bool RE_CLASS_match(RegexElement re, char *text, int *loc, Stack stack)$/;"	f
+RE_CLASS_match	./src/engine.c	/^bool RE_CLASS_match(RegexElement re, Stack stack, EngineState current) $/;"	f
 RE_END_ANCHOR	./src/engine.h	/^enum { RE_CHAR, RE_STAR, RE_CLASS, RE_START_ANCHOR, RE_END_ANCHOR };$/;"	e	enum:__anon1
-RE_END_ANCHOR_match	./src/engine.c	/^bool RE_END_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack)$/;"	f
+RE_END_ANCHOR_match	./src/engine.c	/^bool RE_END_ANCHOR_match(RegexElement re, Stack stack, EngineState current) $/;"	f
 RE_STAR	./src/engine.h	/^enum { RE_CHAR, RE_STAR, RE_CLASS, RE_START_ANCHOR, RE_END_ANCHOR };$/;"	e	enum:__anon1
 RE_START_ANCHOR	./src/engine.h	/^enum { RE_CHAR, RE_STAR, RE_CLASS, RE_START_ANCHOR, RE_END_ANCHOR };$/;"	e	enum:__anon1
-RE_START_ANCHOR_match	./src/engine.c	/^bool RE_START_ANCHOR_match(RegexElement re, char *text, int *loc, Stack stack)$/;"	f
-RE_STAR_match	./src/engine.c	/^bool RE_STAR_match(RegexElement re, char *text, int *loc, Stack stack)$/;"	f
+RE_START_ANCHOR_match	./src/engine.c	/^bool RE_START_ANCHOR_match(RegexElement re, Stack stack, EngineState current) $/;"	f
+RE_STAR_match	./src/engine.c	/^bool RE_STAR_match(RegexElement re, Stack stack, EngineState current) $/;"	f
 RE_free	./src/engine.c	/^void RE_free(RegexElement *element)$/;"	f
-RE_match	./src/engine.c	/^bool RE_match(RegexElement re, char *text, int *loc, Stack stack)$/;"	f
+RE_match	./src/engine.c	/^bool RE_match(RegexElement re, Stack stack, EngineState current) $/;"	f
 RE_new	./src/engine.c	/^RegexElement RE_new(int type)$/;"	f
 Regex	./src/engine.h	/^} *Regex;$/;"	t	typeref:struct:REGEX
 RegexElement	./src/engine.h	/^} *RegexElement;$/;"	t	typeref:struct:RE
@@ -33,6 +33,7 @@ ccl	./src/engine.h	/^    char *ccl;$/;"	m	struct:RE
 ch	./src/engine.h	/^    int ch;$/;"	m	struct:RE
 child	./src/engine.h	/^    struct RE *child;$/;"	m	struct:RE	typeref:struct:RE::RE
 elements	./src/stack.h	/^    EngineState *elements;$/;"	m	struct:stack
+elements	./src/stack.h	/^    RegexElement *elements;$/;"	m	struct:state
 exp	./src/engine.h	/^    RegexElement *exp;$/;"	m	struct:REGEX
 exp_index	./src/stack.h	/^    int exp_index;$/;"	m	struct:state
 len	./src/engine.h	/^    int len;$/;"	m	struct:REGEX
@@ -48,8 +49,10 @@ stack_new	./src/stack.c	/^Stack stack_new()$/;"	f
 stack_pop	./src/stack.c	/^EngineState stack_pop(Stack stack)$/;"	f
 stack_push	./src/stack.c	/^void stack_push(Stack stack, EngineState element)$/;"	f
 state	./src/stack.h	/^typedef struct state {$/;"	s
+state_clone	./src/stack.c	/^EngineState state_clone(const struct state to_clone)$/;"	f
 state_free	./src/stack.c	/^void state_free(EngineState *state)$/;"	f
-state_new	./src/stack.c	/^EngineState state_new(int exp_index, int text_index)$/;"	f
+state_new	./src/stack.c	/^EngineState state_new(RegexElement *elements, int exp_index, char *text, int text_index)$/;"	f
+text	./src/stack.h	/^    char *text;$/;"	m	struct:state
 text_index	./src/stack.h	/^    int text_index;$/;"	m	struct:state
 translate	./src/engine.c	/^void translate(char *regexp, Regex regex)$/;"	f
 type	./src/engine.h	/^    int type;$/;"	m	struct:RE
