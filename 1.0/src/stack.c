@@ -9,7 +9,7 @@ Stack stack_new()
 
     stack->size = 10;
     stack->length = 0;
-    stack->elements = (EngineState *)calloc(stack->size, sizeof(EngineState *));
+    stack->elements = (EngineState *)calloc(stack->size, sizeof(EngineState));
 
     return stack;
 }
@@ -47,12 +47,13 @@ void stack_push(Stack stack, EngineState element)
                                            stack->size * sizeof(EngineState *)); 
     }
 
-    stack->elements[(stack->length)++] = element;
+    stack->elements[stack->length] = element;
+    stack->length++;
 }
 
 EngineState state_new(RegexElement *elements, int exp_index, char *text, int text_index)
 {
-    EngineState state = (EngineState)malloc(sizeof(state));
+    EngineState state = (EngineState)malloc(sizeof(struct state));
 
     state->elements = elements;
     state->exp_index = exp_index;
