@@ -44,7 +44,7 @@ void stack_push(Stack stack, EngineState element)
     {
         stack->size *= 2;
         stack->elements = (EngineState *)realloc(stack->elements, 
-                                           stack->size * sizeof(EngineState *)); 
+                                           stack->size * sizeof(EngineState)); 
     }
 
     stack->elements[stack->length] = element;
